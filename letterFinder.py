@@ -30,3 +30,4 @@ def img_to_array(img_name):
             individual_images.append(roi)
 
     return individual_images
+
