@@ -48,7 +48,7 @@ def main():
     test_loss, test_acc = model.evaluate(test_images, test_labels)
     print('Test accuracy:', test_acc)
 
-    trial_images = letterFinder.img_to_array("digits2.jpg")
+    trial_images = letterFinder.img_to_array("digits.jpg")
     predictions = model.predict(np.array(trial_images, 'float64'))
     count = 0
     for p in predictions:
