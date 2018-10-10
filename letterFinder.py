@@ -10,9 +10,10 @@ from skimage.feature import hog
 
 def img_to_array(img_name):
     img = cv2.imread(img_name)
+    img = cv2.resize(img, None, fx=.3, fy=.3)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (5, 5), 0)
-    edged = cv2.Canny(gray, 200, 200)
+    edged = cv2.Canny(gray, 100, 200)
 
     _, contours, hierarchy = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     rects = [cv2.boundingRect(c) for c in contours]
@@ -29,5 +30,11 @@ def img_to_array(img_name):
 
             individual_images.append(roi)
 
+
+    cv2.imshow("test", img)
+    c = cv2.waitKey(0)
+    if 'q' == chr(c & 255):
+        QuitProgram()
     return individual_images
+
 
