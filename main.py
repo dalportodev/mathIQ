@@ -4,10 +4,13 @@ import letterFinder
 from pathlib import Path
 import cv2
 
+import MathIQGUI
+from tkinter import*
+
 import numpy as np
 import matplotlib.pyplot as plt
 
-UseUI = false;
+useUI = False
 
 def format(img_array):
     result = []
@@ -49,7 +52,17 @@ def main():
     test_loss, test_acc = model.evaluate(test_images, test_labels)
     print('Test accuracy:', test_acc)
 
-    trial_images = letterFinder.img_to_array("digits.jpg")
+    if useUI:
+        root = Tk()
+        root.title("MathIQ")
+        root.geometry("500x200")
+
+        UI = MathIQGUI.UserInterface(root)
+        root.mainloop()
+        while UI.file == 0:
+            trail_images = letterFinder.img_to_array(UI.file)
+    else:
+        trial_images = letterFinder.img_to_array("digits.jpg")
     predictions = model.predict(np.array(trial_images, 'float64'))
     count = 0
     for p in predictions:
