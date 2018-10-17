@@ -10,7 +10,13 @@ from skimage.feature import hog
 
 def img_to_array(img_name):
     img = cv2.imread(img_name)
-    img = cv2.resize(img, None, fx=.3, fy=.3)
+
+    sizer = 1.0
+    height, width = img.shape[:2]
+    while height * sizer > 1000 or width * sizer > 1000:
+        sizer = sizer - 0.01
+
+    img = cv2.resize(img, None, fx=sizer, fy=sizer)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (5, 5), 0)
     edged = cv2.Canny(gray, 100, 200)
@@ -18,6 +24,7 @@ def img_to_array(img_name):
     _, contours, hierarchy = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     rects = [cv2.boundingRect(c) for c in contours]
     individual_images = []
+    rects.sort(key=lambda x: x[0])
 
     for rect in rects:
         x1, y1, x2, y2 = rect
@@ -27,14 +34,14 @@ def img_to_array(img_name):
         if height != 0 and width != 0:
             roi = cv2.resize(roi, (28, 28), interpolation=cv2.INTER_AREA)
             roi = cv2.dilate(roi, (3, 3))
+            #cv2.imshow("Test", roi)
+            cv2.waitKey(0)
 
             individual_images.append(roi)
 
+    print(img.shape[:2])
+    #cv2.imshow("Test", img)
+    #cv2.waitKey(0)
 
-    cv2.imshow("test", img)
-    c = cv2.waitKey(0)
-    if 'q' == chr(c & 255):
-        QuitProgram()
     return individual_images
-
 
