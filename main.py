@@ -8,20 +8,8 @@ import MathIQGUI
 from tkinter import*
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 useUI = False
-
-def format(img_array):
-    result = []
-    for img in img_array:
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        gray = cv2.GaussianBlur(gray, (5, 5), 0)
-        edged = cv2.Canny(gray, 200, 200)
-        edged = cv2.resize(edged, (28, 28), interpolation=cv2.INTER_AREA)
-        edged = cv2.dilate(edged, (3, 3))
-        result.append(edged)
-    return result
 
 
 def main():
@@ -63,8 +51,8 @@ def main():
             trail_images = letterFinder.img_to_array(UI.file)
     else:
         trial_images = letterFinder.img_to_array("digits.jpg")
+    trial_images = letterFinder.img_to_array("IMG_6524.JPG")
     predictions = model.predict(np.array(trial_images, 'float64'))
-    count = 0
     for p in predictions:
         print(np.argmax(p))
 
