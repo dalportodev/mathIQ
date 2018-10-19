@@ -9,7 +9,7 @@ from tkinter import*
 
 import numpy as np
 
-useUI = False
+useUI = True
 
 
 def main():
@@ -40,6 +40,7 @@ def main():
     test_loss, test_acc = model.evaluate(test_images, test_labels)
     print('Test accuracy:', test_acc)
 
+    trial_images = None
     if useUI:
         root = Tk()
         root.title("MathIQ")
@@ -48,10 +49,10 @@ def main():
         UI = MathIQGUI.UserInterface(root)
         root.mainloop()
         while UI.file == 0:
-            trail_images = letterFinder.img_to_array(UI.file)
+            trial_images = letterFinder.img_to_array(UI.file)
     else:
-        trial_images = letterFinder.img_to_array("digits.jpg")
-    trial_images = letterFinder.img_to_array("IMG_6524.JPG")
+        trial_images = letterFinder.img_to_array("IMG_6524.JPG")
+
     predictions = model.predict(np.array(trial_images, 'float64'))
     for p in predictions:
         print(np.argmax(p))

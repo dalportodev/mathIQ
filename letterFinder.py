@@ -1,11 +1,4 @@
 import cv2
-import PIL.ImageOps
-import numpy
-from imutils.perspective import four_point_transform
-from imutils import contours
-import imutils
-import math
-from skimage.feature import hog
 
 
 def img_to_array(img_name):
