@@ -28,11 +28,11 @@ def img_to_array(img_name):
             roi = cv2.resize(roi, (28, 28), interpolation=cv2.INTER_AREA)
             roi = cv2.dilate(roi, (3, 3))
             #cv2.imshow("Test", roi)
-            cv2.waitKey(0)
+            #cv2.waitKey(0)
 
             individual_images.append(roi)
 
-    print(img.shape[:2])
+    #print(img.shape[:2])
     #cv2.imshow("Test", img)
     #cv2.waitKey(0)
 

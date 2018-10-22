@@ -9,7 +9,7 @@ from tkinter import*
 
 import numpy as np
 
-useUI = True
+useUI = False
 
 
 def main():
@@ -37,8 +37,8 @@ def main():
         model.fit(train_images, train_labels, epochs=5)
         model.save("my_model.h5")
 
-    test_loss, test_acc = model.evaluate(test_images, test_labels)
-    print('Test accuracy:', test_acc)
+    #test_loss, test_acc = model.evaluate(test_images, test_labels)
+    #print('Test accuracy:', test_acc)
 
     trial_images = None
     if useUI:
@@ -53,9 +53,20 @@ def main():
     else:
         trial_images = letterFinder.img_to_array("IMG_6524.JPG")
 
-    predictions = model.predict(np.array(trial_images, 'float64'))
-    for p in predictions:
-        print(np.argmax(p))
+    for i in trial_images:
+        cv2.imshow("Make Sure These All Look Right", i)
+        cv2.waitKey(0)
+    predictions = model.predict(np.array(trial_images.copy(), 'float64'))
+
+    count = 0
+    trial_labels = []
+    while count < len(predictions):
+        print("This is my prediction: ", np.argmax(predictions[count]))
+        actual = input("What is it supposed to be? ->")
+        trial_labels.append(actual)
+        count += 1
+
+    model.fit(np.array(trial_images.copy(), 'float64'), np.array(trial_labels), epochs=5)
 
 
 if __name__ == "__main__":
