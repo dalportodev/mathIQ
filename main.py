@@ -9,7 +9,7 @@ from tkinter import*
 
 import numpy as np
 
-useUI = False
+useUI = True
 
 
 def main():
@@ -46,13 +46,16 @@ def main():
         root.title("MathIQ")
         root.geometry("500x200")
 
-        UI = MathIQGUI.UserInterface(root)
+        UI = MathIQGUI.UserInterface(root, model, postAnalysis)
+        print(UI.file)
         root.mainloop()
-        while UI.file == 0:
-            trial_images = letterFinder.img_to_array(UI.file)
     else:
         trial_images = letterFinder.img_to_array("IMG_6524.JPG")
+        postAnalysis(model, trial_images)
 
+
+
+def postAnalysis(model, trial_images):
     for i in trial_images:
         cv2.imshow("Make Sure These All Look Right", i)
         cv2.waitKey(0)
