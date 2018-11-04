@@ -5,9 +5,18 @@ from pathlib import Path
 import cv2
 
 import MathIQGUI
-from tkinter import*
+#this might be a compatibility issue between windows and linux environemnts
+#The line below I ad
+#from Tkinter import*
+import tkinter as tk
 
 import numpy as np
+
+#chris added
+from keras.preprocessing.image import ImageDataGenerator
+from matplotlib import pyplot
+from keras import backend as K
+K.set_image_dim_ordering('th')
 
 useUI = False
 
@@ -15,8 +24,20 @@ useUI = False
 def main():
     my_file = Path("my_model.h5")
     (train_images, train_labels), (test_images, test_labels) = keras.datasets.mnist.load_data()
-    train_images = train_images / 255.0
-    test_images = test_images / 255.0
+
+    #chris added
+    train_images = train_images.reshape(train_images.shape[0], 1, 28, 28)
+    test_images = test_images.reshape(test_images.shape[0], 1, 28, 28)
+
+    train_images = train_images.astype('float32')
+    test_images = test_images.astype('float32')
+
+    model = ImageDataGenerator(rotation_range=90)
+    model.fit(train_images)
+
+    #train_images = train_images / 255.0
+    #test_images = test_images / 255.0
+
 
     if my_file.exists():
         model = keras.models.load_model("my_model.h5")
@@ -33,7 +54,6 @@ def main():
         model.compile(optimizer=tf.train.AdamOptimizer(),
                       loss='sparse_categorical_crossentropy',
                       metrics=['accuracy'])
-
         model.fit(train_images, train_labels, epochs=5)
         model.save("my_model.h5")
 
