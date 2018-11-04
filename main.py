@@ -12,7 +12,7 @@ import tkinter as tk
 
 import numpy as np
 
-<<<<<<< HEAD
+ 
 #chris added
 from keras.preprocessing.image import ImageDataGenerator
 from matplotlib import pyplot
@@ -20,9 +20,6 @@ from keras import backend as K
 K.set_image_dim_ordering('th')
 
 useUI = False
-=======
-useUI = True
->>>>>>> 14ec03ae2a1e801e8ec44a94fe7fc1e2fd423c65
 
 
 def main():
