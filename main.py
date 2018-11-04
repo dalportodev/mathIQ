@@ -12,6 +12,7 @@ import tkinter as tk
 
 import numpy as np
 
+<<<<<<< HEAD
 #chris added
 from keras.preprocessing.image import ImageDataGenerator
 from matplotlib import pyplot
@@ -19,6 +20,9 @@ from keras import backend as K
 K.set_image_dim_ordering('th')
 
 useUI = False
+=======
+useUI = True
+>>>>>>> 14ec03ae2a1e801e8ec44a94fe7fc1e2fd423c65
 
 
 def main():
@@ -66,13 +70,16 @@ def main():
         root.title("MathIQ")
         root.geometry("500x200")
 
-        UI = MathIQGUI.UserInterface(root)
+        UI = MathIQGUI.UserInterface(root, model, postAnalysis)
+        print(UI.file)
         root.mainloop()
-        while UI.file == 0:
-            trial_images = letterFinder.img_to_array(UI.file)
     else:
         trial_images = letterFinder.img_to_array("IMG_6524.JPG")
+        postAnalysis(model, trial_images)
 
+
+
+def postAnalysis(model, trial_images):
     for i in trial_images:
         cv2.imshow("Make Sure These All Look Right", i)
         cv2.waitKey(0)
