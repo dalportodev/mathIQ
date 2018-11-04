@@ -26,20 +26,30 @@ def main():
     my_file = Path("my_model.h5")
     (train_images, train_labels), (test_images, test_labels) = keras.datasets.mnist.load_data()
 
+    train_images = train_images / 255.0
+    test_images = test_images / 255.0
+
     #chris added
-    train_images = train_images.reshape(train_images.shape[0], 1, 28, 28)
-    test_images = test_images.reshape(test_images.shape[0], 1, 28, 28)
+    #train_images = train_images.reshape(train_images.shape[0], 1, 28, 28)
+    #test_images = test_images.reshape(test_images.shape[0], 1, 28, 28)
 
-    train_images = train_images.astype('float32')
-    test_images = test_images.astype('float32')
+    #train_images = train_images.astype('float32')
+    #test_images = test_images.astype('float32')
 
-    model = ImageDataGenerator(rotation_range=90)
-    model.fit(train_images)
+    #model = ImageDataGenerator(rotation_range=90)
+    #model.fit(train_images)
+    #model = ImageDataGenerator(featurewise_center=True, featurewise_std_normalization=True)
+    #model.fit(train_images)
+    #model = ImageDataGenerator(zca_whitening=True)
+    #model.fit(train_images)
+    #model = ImageDataGenerator(rotation_range=90)
+    #model.fit(train_images)
+    #model = ImageDataGenerator(width_shift_range=shift, height_shift_range=shift)
+    #model.fit(train_images)
+    #model = ImageDataGenerator(horizontal_flip=True, vertical_flip=True)
+    #model.fit(train_images)
 
-    #train_images = train_images / 255.0
-    #test_images = test_images / 255.0
-
-
+    
     if my_file.exists():
         model = keras.models.load_model("my_model.h5")
         model.compile(optimizer=tf.train.AdamOptimizer(),
@@ -51,12 +61,13 @@ def main():
             keras.layers.Dense(128, activation=tf.nn.relu),
             keras.layers.Dense(10, activation=tf.nn.softmax)
         ])
-
         model.compile(optimizer=tf.train.AdamOptimizer(),
                       loss='sparse_categorical_crossentropy',
                       metrics=['accuracy'])
+        
         model.fit(train_images, train_labels, epochs=5)
         model.save("my_model.h5")
+
 
     #test_loss, test_acc = model.evaluate(test_images, test_labels)
     #print('Test accuracy:', test_acc)
