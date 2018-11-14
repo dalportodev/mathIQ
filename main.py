@@ -3,6 +3,7 @@ from tensorflow import keras
 import letterFinder
 from pathlib import Path
 import cv2
+from scipy.misc import pilutil
 
 import MathIQGUI
 #this might be a compatibility issue between windows and linux environemnts
@@ -22,12 +23,21 @@ K.set_image_dim_ordering('th')
 useUI = False
 
 
+def change_images(img_array):
+    result = []
+    for ti in img_array:
+        temp = pilutil.toimage(ti).convert('RGB')
+        temp = letterFinder.change_color(np.asarray(temp))
+        result.append(temp)
+    return result
+
+
 def main():
     my_file = Path("my_model.h5")
     (train_images, train_labels), (test_images, test_labels) = keras.datasets.mnist.load_data()
 
-    train_images = train_images / 255.0
-    test_images = test_images / 255.0
+    train_images = change_images(train_images)
+    test_images = change_images(test_images)
 
     #chris added
     #train_images = train_images.reshape(train_images.shape[0], 1, 28, 28)
@@ -65,16 +75,15 @@ def main():
                       loss='sparse_categorical_crossentropy',
                       metrics=['accuracy'])
         
-        model.fit(train_images, train_labels, epochs=5)
+        model.fit(np.array(train_images, 'float64'), train_labels, epochs=5)
         model.save("my_model.h5")
 
-
-    #test_loss, test_acc = model.evaluate(test_images, test_labels)
-    #print('Test accuracy:', test_acc)
+    test_loss, test_acc = model.evaluate(np.array(test_images, 'float64'), test_labels)
+    print('Test accuracy:', test_acc)
 
     trial_images = None
     if useUI:
-        root = Tk()
+        root = tk()
         root.title("MathIQ")
         root.geometry("500x200")
 

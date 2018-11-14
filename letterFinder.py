@@ -10,9 +10,7 @@ def img_to_array(img_name):
         sizer = sizer - 0.01
 
     img = cv2.resize(img, None, fx=sizer, fy=sizer)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    gray = cv2.GaussianBlur(gray, (5, 5), 0)
-    edged = cv2.Canny(gray, 100, 200)
+    edged = change_color(img)
 
     _, contours, hierarchy = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     rects = [cv2.boundingRect(c) for c in contours]
@@ -38,3 +36,9 @@ def img_to_array(img_name):
 
     return individual_images
 
+
+def change_color(img):
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = cv2.GaussianBlur(gray, (5, 5), 0)
+    edged = cv2.Canny(gray, 100, 200)
+    return edged
