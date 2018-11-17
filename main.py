@@ -21,7 +21,7 @@ from keras import backend as K
 from keras.datasets import mnist
 K.set_image_dim_ordering('th')
 
-useUI = False
+useUI = True
 
 
 def main():
@@ -76,13 +76,8 @@ def main():
 
     trial_images = None
     if useUI:
-        root = Tk()
-        root.title("MathIQ")
-        root.geometry("500x200")
+        UI = MathIQGUI.UserInterface(model)
 
-        UI = MathIQGUI.UserInterface(root, model, postAnalysis)
-        print(UI.file)
-        root.mainloop()
     else:
         trial_images = letterFinder.img_to_array("IMG_6524.JPG")
         postAnalysis(model, trial_images)
