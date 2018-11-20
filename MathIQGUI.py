@@ -85,6 +85,8 @@ class MainFrame(Frame):
 
         self.correctButton["command"] = self.correctionAction
 
+        self.solveButton["command"] = self.solveAction
+
         if(self.ui.filemodel):
             self.textBoxFile.configure(text = self.ui.filemodel.file)
             self.textBoxFile.text = self.ui.filemodel.file
@@ -112,12 +114,17 @@ class MainFrame(Frame):
             print("Entered")
             self.ui.loadCorrectionFrame()
 
+    def solveAction(self):
+        answer = self.ui.filemodel.solveExpression()
+        self.textBoxAnswer.configure(text = str(answer))
+        self.textBoxAnswer.text= str(answer)
+
 class CorrectionFrame(Frame):
 
     def __init__(self, master, ui):
         super(CorrectionFrame, self).__init__(master)
         self.ui = ui
-        self.choices = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
+        self.choices = ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "+", "-", "*", "/")
         self.index = 0
         self.expressions_text = self.ui.filemodel.getExpressionText()
         self.createWigdets()
@@ -172,7 +179,7 @@ class CorrectionFrame(Frame):
         self.correction.set(self.ui.filemodel.expression[self.index])
 
     def doneAction(self):
-        self.ui.filemodel.updateMLModel()
+        #self.ui.filemodel.updateMLModel()
         self.ui.loadMainFrame()
 
     def prevAction(self):
@@ -216,6 +223,12 @@ class FileModel(object):
             img = Image.fromarray(i)
             image = ImageTk.PhotoImage(img)
             self.images_tkinter.append(image)
+
+    def solveExpression(self):
+        problem = ""
+        for char in self.expression:
+            problem = problem + char
+        return eval(problem)
 
 
 
