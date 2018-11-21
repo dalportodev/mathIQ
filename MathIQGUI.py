@@ -1,7 +1,6 @@
 from tkinter import filedialog
 from tkinter import *
 from PIL import ImageTk, Image
-import cv2
 import letterFinder
 import numpy as np
 
@@ -11,133 +10,225 @@ class UserInterface(object):
     def __init__(self, model):
         self.root = Tk()
         self.root.title("MathIQ")
-        self.root.geometry("500x200")
-
+        #self.root.geometry("500x200")
         self.model = model
-        self.currentFrame = MainFrame(self.root,  self.postanalysis)
+        self.filemodel = None
+        self.currentFrame = MainFrame(self.root,  self)
 
         self.root.mainloop()
 
 
-    def postanalysis(self, trial_images):
-        self.currentFrame.destroy();
-        predictions = self.model.predict(np.array(trial_images.copy(), 'float64'))
-        self.currentFrame = TestFrame(self.root, trial_images, predictions, self.finishedfile)
-
-    def finishedfile(self, trial_images, trial_labels):
-
+    def loadCorrectionFrame(self):
         self.currentFrame.destroy()
-        self.currentFrame = MainFrame(self.root, self.postanalysis)
-        self.model.fit(np.array(trial_images.copy(), 'float64'), np.array(trial_labels), epochs=5)
+        self.currentFrame = CorrectionFrame(self.root, self)
 
+    def loadMainFrame(self):
+        self.currentFrame.destroy()
+        self.currentFrame=MainFrame(self.root,  self)
 
 
 class MainFrame(Frame):
 
-    def __init__(self, master, postFunc):
+    def __init__(self, master, ui):
         super(MainFrame, self).__init__(master)
+        self.ui = ui
+        self.file = None
+        self.createWigdets()
 
-        self.file = 0
-        self.postFunc = postFunc
-
+    def createWigdets(self):
+        buttonwidth = 15
+        buttonpadx = 2
+        buttonpady = 10
         self.grid()
-        self.textBox = Text(self, width=50, height=5, wrap=WORD)
-        self.textBox.grid(row=0, column=0, columnspan=3, sticky=W)
-        self.selectFileButton = Button(self, text="Select File")
-        self.selectFileButton["command"] = self.findfile
-        self.selectFileButton.grid(row=1, column=0, sticky=W)
 
-    def findfile(self):
-        #self.file = filedialog.askopenfilename(initialdir="/", title="Select file",
-        #                                       filetypes=(("jpeg files", "*.jpg"), ("all files", "*.*")))
+        #self.columnconfigure(0, weight=1)
+        #self.columnconfigure(1, weight=1)
+        #self.columnconfigure(2, weight=1)
+        #self.columnconfigure(3, weight=1)
 
-        #used for testing
-        self.file = filedialog.askopenfilename(initialdir="Users\Sasha\PycharmProjects\mathIQ_local", title="Select file",
-                                               filetypes=(("jpeg files", "*.jpg"), ("all files", "*.*")))
-        self.textBox.insert(0.0, self.file)
-        trial_images = letterFinder.img_to_array(self.file)
-        self.postFunc(trial_images)
+        #self.rowconfigure(0, weight=1)
+        #self.rowconfigure(1, weight=1)
+        #self.rowconfigure(2, weight=1)
 
-# rename correction frame
-class TestFrame(Frame):
+        self.textBoxFile = Label(self,
+                                 text="No file Selected",
+                                 justify = LEFT)
+        self.textBoxFile.grid(row=0, column=0, columnspan=4, sticky=W,
+                              padx=10, pady=10)
+        self.textBoxExpression = Label(self,
+                                       text="No expression detected")
+        self.textBoxExpression.grid(row=1, column =0, columnspan =3, sticky=W,
+                                    padx=10, pady=10)
+        self.textBoxAnswer = Label(self, text="N/A")
+        self.textBoxAnswer.grid(row=1, column=3, sticky=W,
+                                padx=10, pady=10)
+        self.selectFileButton = Button(self, text="Select File",
+                                       width=buttonwidth)
+        self.selectFileButton.grid(row=2, column=0, sticky=S,
+                                   padx=buttonpadx, pady=buttonpady)
+        self.correctButton = Button(self, text="Correct",
+                                    width=buttonwidth)
+        self.correctButton.grid(row=2, column=1, sticky=S,
+                                padx=buttonpadx, pady=buttonpady)
+        self.solveButton = Button(self, text="Solve",
+                                  width=buttonwidth)
+        self.solveButton.grid(row=2, column=2, sticky=S,
+                              padx=buttonpadx, pady=buttonpady)
+        self.exitButton = Button(self, text="Exit",
+                                 width=buttonwidth)
+        self.exitButton.grid(row=2, column=3, sticky=S,
+                             padx=buttonpadx, pady=buttonpady)
 
-    def __init__(self, master, images, predictions, finishfunc):
-        super(TestFrame, self).__init__(master)
-        self.root = master
-        self.old_images = images
-        #self.images = images
-        self.images = []
-        for i in images:
-            img = Image.fromarray(i)
-            image = ImageTk.PhotoImage(img)
-            self.images.append(image)
-        self.predictions = predictions
-        self.trail_labels = []
-        for prediction in self.predictions:
-            self.trail_labels.append(str(np.argmax(prediction)))
-        self.finishfunc = finishfunc
+        self.exitButton["command"] = self.exitAction
+
+        self.selectFileButton["command"] = self.findFileAction
+
+        self.correctButton["command"] = self.correctionAction
+
+        self.solveButton["command"] = self.solveAction
+
+        if(self.ui.filemodel):
+            self.textBoxFile.configure(text = self.ui.filemodel.file)
+            self.textBoxFile.text = self.ui.filemodel.file
+            self.textBoxExpression.configure(text = self.ui.filemodel.expression)
+            self.textBoxExpression.text = self.ui.filemodel.expression
+
+
+    def exitAction(self):
+        print("exit called")
+        #self.destroy()
+        self.master.destroy()
+
+    def findFileAction(self):
+        file = filedialog.askopenfilename(initialdir="/", title="Select file", filetypes=(("jpeg files", "*.jpg"), ("all files", "*.*")))
+        #file = filedialog.askopenfilename(initialdir="", title="Select file",filetypes=(("jpeg files", "*.jpg"), ("all files", "*.*")))
+        self.ui.filemodel = FileModel(file, self.ui.model)
+        self.textBoxFile.configure(text = file)
+        self.textBoxFile.text = file
+        expression = self.ui.filemodel.getExpressionText()
+        self.textBoxExpression.configure(text = expression)
+        self.textBoxExpression = expression
+
+    def correctionAction(self):
+        if self.ui.filemodel:
+            print("Entered")
+            self.ui.loadCorrectionFrame()
+
+    def solveAction(self):
+        answer = self.ui.filemodel.solveExpression()
+        self.textBoxAnswer.configure(text = str(answer))
+        self.textBoxAnswer.text= str(answer)
+
+class CorrectionFrame(Frame):
+
+    def __init__(self, master, ui):
+        super(CorrectionFrame, self).__init__(master)
+        self.ui = ui
+        self.choices = ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "+", "-", "*", "/")
         self.index = 0
+        self.expressions_text = self.ui.filemodel.getExpressionText()
+        self.createWigdets()
 
-        self.choices = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
 
-        self.correction = StringVar(self.root)
-        self.correction.set(self.trail_labels[self.index])
-
+    def createWigdets(self):
+        buttonwidth = 10
+        buttonpadx = 2
+        buttonpady = 10
         self.grid()
 
-        self.imagedisplay = Label(self, image=self.images[self.index])
-        self.imagedisplay.grid(row=0, column=0, sticky=W)
+        self.imageLabelText = Label(self, text="Image")
+        self.imageLabelText.grid(row=0, column=0, sticky= W,
+                                 padx=10, pady=10)
+        self.imageLabel = Label(self, image=self.ui.filemodel.images_tkinter[self.index])
+        self.imageLabel.grid(row=0, column=1, sticky=W,
+                             padx=10, pady=10)
+        self.dropDownText = Label(self, text="Correction")
+        self.dropDownText.grid(row=1, column=0, sticky=W,
+                               padx=10, pady=10)
 
-        self.predictiondisplay = Label(self, text = "We think this number is " + self.trail_labels[self.index])
-        self.predictiondisplay.grid(row=1, column=0, sticky=W)
-
-        self.changelable = Label(self, text = "select the symbol that matches")
-        self.changelable.grid(row=2, column=0, sticky=W)
-
-        self.optionsmenu = OptionMenu(self.root, self.correction, *self.choices)
-        self.optionsmenu.grid(row=3, column=0, sticky=W)
+        self.correction = StringVar(self)
+        self.correction.set(self.expressions_text[self.index])
+        self.correctionsMenue = OptionMenu(self, self.correction, *self.choices)
+        self.correctionsMenue.grid(row=1, column=1,
+                                   padx=10, pady=10, sticky=W)
         self.correction.trace("w", self.correct)
 
-        self.nextbutton = Button(self, text="next")
-        self.nextbutton["command"] = self.next
-        self.nextbutton.grid(row=4, column=3, sticky=S)
-
-        self.previousbutton = Button(self, text="previous")
-        self.previousbutton["command"] = self.previous
-        self.previousbutton.grid(row=4, column=1, sticky=S)
-
-        self.donebutton = Button(self, text="done")
-        self.donebutton["command"] = self.done
-        self.donebutton.grid(row=4, column=2, sticky=S)
+        self.previousButton = Button(self, text="Previous", width=buttonwidth)
+        self.previousButton.grid(row=2, column=0,
+                                 padx=10, pady=10)
+        self.doneButton = Button(self, text="Done", width=buttonwidth)
+        self.doneButton.grid(row=2, column=1,
+                             padx=10, pady=10)
+        self.nextButton = Button(self, text="Next", width=buttonwidth)
+        self.nextButton.grid(row=2, column=3,
+                             padx=10, pady=10)
 
 
-    def setvalues(self):
-        self.imagedisplay.configure(image= self.images[self.index])
-        self.imagedisplay.image =  self.images[self.index]
+        self.doneButton["command"] = self.doneAction
+        self.previousButton["command"] = self.prevAction
+        self.nextButton["command"] = self.nextAction
 
-        newstring = "We think this number is " + self.trail_labels[self.index]
-        self.predictiondisplay.configure(text = newstring)
-        self.predictiondisplay.text = newstring
-
-        self.correction.set(self.trail_labels[self.index])
 
     def correct(self, *args):
-        self.trail_labels[self.index] = self.correction.get()
+        self.expressions_text[self.index] = self.correction.get()
+        self.ui.filemodel.correctPrediction(self.index ,self.correction.get())
 
-    def next(self):
-        if self.index < len(self.images)-1:
-            self.index = self.index + 1
-            self.setvalues()
+    def updateFrame(self):
+        self.imageLabel.configure(image = self.ui.filemodel.images_tkinter[self.index])
+        self.imageLabel.image = self.ui.filemodel.images_tkinter[self.index]
+        self.correction.set(self.ui.filemodel.expression[self.index])
 
-    def previous(self):
+    def doneAction(self):
+        #self.ui.filemodel.updateMLModel()
+        self.ui.loadMainFrame()
+
+    def prevAction(self):
         if self.index > 0:
             self.index = self.index - 1
-            self.setvalues()
+            self.updateFrame()
 
-    def done(self):
-        #self.optionsmenu.destroy()
-        self.finishfunc(self.old_images, self.trail_labels)
-        #self.root.destroy()
+    def nextAction(self):
+        if self.index < len(self.ui.filemodel.expression)-1:
+            self.index = self.index + 1
+            self.updateFrame()
+
+
+
+class FileModel(object):
+
+    def __init__(self, filename, mlmodel):
+        self.file = filename
+        self.mlmodel = mlmodel
+        self.images = letterFinder.img_to_array(self.file)
+        self.images_tkinter = []
+        self.convertImages()
+        self.predicted = self.mlmodel.predict(np.array(self.images.copy(), 'float64'))
+        self.expression = self.getExpressionText()
+
+    def correctPrediction(self, index, correctvalue):
+        self.expression[index] = correctvalue
+
+    def updateMLModel(self):
+        """Trains the ML model, by telling it the correct values"""
+        self.mlmodel.fit(np.array(self.images.copy(), 'float64'), np.array(self.expression), epochs=5)
+
+    def getExpressionText(self):
+        expressiontext = []
+        for prediction in self.predicted:
+            expressiontext.append(str(np.argmax(prediction)))
+        return expressiontext
+
+    def convertImages(self):
+        for i in self.images:
+            img = Image.fromarray(i)
+            image = ImageTk.PhotoImage(img)
+            self.images_tkinter.append(image)
+
+    def solveExpression(self):
+        problem = ""
+        for char in self.expression:
+            problem = problem + char
+        return eval(problem)
 
 
 

@@ -22,7 +22,8 @@ from keras import backend as K
 from keras.datasets import mnist
 K.set_image_dim_ordering('th')
 
-useUI = False
+useUI = True
+trainModel=False
 
 
 def main():
@@ -62,30 +63,32 @@ def main():
     #model.fit(train_images)
 
 
-    train_datagen = ImageDataGenerator(
-        rescale=1./255,
-        shear_range=0.2,
-        zoom_range=0.2,
-        horizontal_flip=True)
 
-    test_datagen = ImageDataGenerator(rescale=1./255)
+    if trainModel == True:
+        train_datagen = ImageDataGenerator(
+            rescale=1./255,
+            shear_range=0.2,
+            zoom_range=0.2,
+            horizontal_flip=True)
 
-    train_generator = train_datagen.flow_from_directory(
-    	directory=r"./extracted_images",
-    	target_size=(28, 28),
-    	color_mode="rgb",
-    	batch_size=32,
-    	class_mode="categorical",
-    	shuffle=True,
-    	seed=42)
-    validation_generator = test_datagen.flow_from_directory(
-    	directory=r"./extracted_images",
-    	target_size=(28, 28),
-    	color_mode="rgb",
-    	batch_size=32,
-    	class_mode="categorical",
-    	shuffle=True,
-    	seed=42)
+        test_datagen = ImageDataGenerator(rescale=1./255)
+
+        train_generator = train_datagen.flow_from_directory(
+            directory=r"./extracted_images",
+            target_size=(28, 28),
+            color_mode="rgb",
+            batch_size=32,
+            class_mode="binary",
+            shuffle=True,
+            seed=42)
+        validation_generator = test_datagen.flow_from_directory(
+            directory=r"./extracted_images",
+            target_size=(28, 28),
+            color_mode="rgb",
+            batch_size=32,
+            class_mode="binary",
+            shuffle=True,
+            seed=42)
 
     
     if my_file.exists():
