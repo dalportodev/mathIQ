@@ -21,9 +21,9 @@ def img_to_array(img_name):
 
     for rect in rects:
         x1, y1, x2, y2 = rect
-        cv2.rectangle(img, (x1, y1), (x1 + x2, y1 + y2), (0, 255, 0), 3)
-        roi = edged[y1:y1+y2, x1:x1+x2]
-        height, width = roi.shape
+        #cv2.rectangle(img, (x1, y1), (x1 + x2, y1 + y2), (0, 255, 0), 3)
+        roi = img[y1:y1+y2, x1:x1+x2]
+        height, width, chan = roi.shape
         if height != 0 and width != 0:
             roi = cv2.resize(roi, (28, 28), interpolation=cv2.INTER_AREA)
             roi = cv2.dilate(roi, (3, 3))

@@ -202,7 +202,7 @@ class FileModel(object):
         self.images = letterFinder.img_to_array(self.file)
         self.images_tkinter = []
         self.convertImages()
-        self.predicted = self.mlmodel.predict(np.array(self.images.copy(), 'float64'))
+        self.predicted = self.mlmodel.predict_on_batch(np.asarray(self.images.copy()))
         self.expression = self.getExpressionText()
 
     def correctPrediction(self, index, correctvalue):
@@ -210,7 +210,7 @@ class FileModel(object):
 
     def updateMLModel(self):
         """Trains the ML model, by telling it the correct values"""
-        self.mlmodel.fit(np.array(self.images.copy(), 'float64'), np.array(self.expression), epochs=5)
+        #self.mlmodel.fit(np.array(self.images.copy(), 'float64'), np.array(self.expression), epochs=5)
 
     def getExpressionText(self):
         expressiontext = []
@@ -223,6 +223,12 @@ class FileModel(object):
             img = Image.fromarray(i)
             image = ImageTk.PhotoImage(img)
             self.images_tkinter.append(image)
+
+        temp = []
+        for i in self.images:
+            i = np.transpose(i, (2, 0, 1))
+            temp.append(i)
+        self.images = temp
 
     def solveExpression(self):
         problem = ""
