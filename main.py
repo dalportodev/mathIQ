@@ -4,6 +4,7 @@ from tensorflow import keras
 import letterFinder
 from pathlib import Path
 import cv2
+import os
 
 import MathIQGUI
 #this might be a compatibility issue between windows and linux environemnts
@@ -29,6 +30,15 @@ def main():
     my_file = Path("my_model.h5")
     (train_images, train_labels), (test_images, test_labels) = mnist.load_data()
 
+    #train_dict = {}
+    #for c in os.listdir("extracted_images"):
+    #    temp_array = []
+    #    if os.path.isdir("extracted_images/" + c):
+    #        print("Reading " + c + "...")
+    #        for i in os.listdir("extracted_images/" + c):
+    #            temp_array.append(cv2.imread("extracted_images/" + c + "/" + i))
+    #        train_dict[c] = temp_array
+
     train_images = train_images / 255.0
     test_images = test_images / 255.0
 
@@ -51,6 +61,7 @@ def main():
     #model.fit(train_images)
     #model = ImageDataGenerator(horizontal_flip=True, vertical_flip=True)
     #model.fit(train_images)
+
 
 
     if trainModel == True:
@@ -83,30 +94,46 @@ def main():
     if my_file.exists():
         model = keras.models.load_model("my_model.h5")
         model.compile(optimizer=tf.train.AdamOptimizer(),
-                      loss='sparse_categorical_crossentropy',
+                      loss='categorical_crossentropy',
                       metrics=['accuracy'])
     else:
-        model = keras.Sequential([
-            keras.layers.Flatten(input_shape=(28, 28)),
-            keras.layers.Dense(128, activation=tf.nn.relu),
-            keras.layers.Dense(10, activation=tf.nn.softmax)
-        ])
-        #model.add(Conv2D(32, (3,3), input_shape = (28, 28, 3), activation = 'relu'))
-        #model.add(Flatten())
-        #model.add(Dense(129, activation=tf.nn.relu))
-        #model.add(Dense(10, activation=tf.nn.softmax))
+        #model = keras.Sequential([
+        #    keras.layers.Flatten(input_shape=(28, 28)),
+        #    keras.layers.Dense(128, activation=tf.nn.relu),
+        #    keras.layers.Dense(82, activation=tf.nn.softmax)
+        #])
+        model = keras.Sequential()
+        model.add(keras.layers.Conv2D(32, (3,3), input_shape = (3, 28, 28), activation = 'relu'))
+        model.add(keras.layers.Flatten())
+        model.add(keras.layers.Dense(129, activation=tf.nn.relu))
+        model.add(keras.layers.Dense(82, activation=tf.nn.softmax))
 
         model.compile(optimizer=tf.train.AdamOptimizer(),
-                      loss='sparse_categorical_crossentropy',
+                      loss='categorical_crossentropy',
                       metrics=['accuracy'])
-        model.fit(train_images, train_labels, epochs=5)
+        #model.fit(train_images, train_labels, epochs=5)
+        #for symb in train_dict:
 
-        #model.fit_generator(
-		#        train_generator,
-		#        steps_per_epoch=2000,
-		#        epochs=50,
-		#        validation_data=validation_generator,
-		#        validation_steps=800)
+         #   temp_array = []
+         #   imgs = train_dict[symb]
+
+         #   if symb == "0":
+         #       count = 0
+         #       while count < count(imgs):
+         #           temp_array.append(0)
+         #           count += 1
+         #       model.fit(np.array(imgs, 'float64'), np.array(temp_array), epochs=5)
+
+
+
+
+        model.fit_generator(
+		        train_generator,
+		        steps_per_epoch=2000,
+		        epochs=5,
+		        validation_data=validation_generator,
+		        validation_steps=800,
+                workers=8)
         model.save("my_model.h5")
 
 
@@ -119,8 +146,9 @@ def main():
 
     else:
         trial_images = letterFinder.img_to_array("IMG_6524.JPG")
-        postAnalysis(model, trial_images)
-
+        #postAnalysis(model, trial_images)
+        print(model.evaluate_generator(generator=validation_generator, steps=1000, workers=4))
+        print(train_generator.class_indices)
 
 
 def postAnalysis(model, trial_images):
