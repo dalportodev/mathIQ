@@ -26,6 +26,7 @@ from keras.datasets import mnist
 K.set_image_dim_ordering('th')
 
 useUI = True
+classDict = {}
 
 
 def main():
@@ -141,9 +142,9 @@ def main():
     #print('Test accuracy:', test_acc)
 
     trial_images = None
-    if useUI:
-        UI = MathIQGUI.UserInterface(model)
 
+    if useUI:
+        UI = MathIQGUI.UserInterface(model, train_generator.class_indices)
     else:
         userImgs = letterFinder.img_to_array("IMG_6524.JPG")
         print(train_generator.class_indices)

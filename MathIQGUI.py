@@ -2,16 +2,20 @@ from tkinter import filedialog
 from tkinter import *
 from PIL import ImageTk, Image
 import letterFinder
+import main
 import numpy as np
 
+classDict = {}
 
 class UserInterface(object):
 
-    def __init__(self, model):
+    def __init__(self, model, classDictFromMain):
         self.root = Tk()
         self.root.title("MathIQ")
         #self.root.geometry("500x200")
         self.model = model
+        global classDict
+        classDict = classDictFromMain
         self.filemodel = None
         self.currentFrame = MainFrame(self.root,  self)
 
@@ -215,7 +219,8 @@ class FileModel(object):
     def getExpressionText(self):
         expressiontext = []
         for prediction in self.predicted:
-            expressiontext.append(str(np.argmax(prediction)))
+            expressiontext.append(str(self.getRealValue(np.argmax(prediction))))
+            #expressiontext.append(str(np.argmax(prediction)))
         return expressiontext
 
     def convertImages(self):
@@ -235,6 +240,11 @@ class FileModel(object):
         for char in self.expression:
             problem = problem + char
         return eval(problem)
+
+    def getRealValue(self, index):
+        for sym, i in classDict.items():
+            if i == index:
+                return sym
 
 
 
